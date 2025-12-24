@@ -2,16 +2,33 @@
   "name": "egitim",
   "version": "0.1.0",
   "private": true,
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "echo 'Dependencies installed successfully'",
+    "build:next": "next build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "build:all": "npm run build:next && npm run build:electron",
+    "verify:build": "node scripts/verify-build.js",
+    "dist": "npm run build:all && npm run verify:build && electron-builder",
+    "dist:win": "npm run build:all && npm run verify:build && electron-builder --win",
+    "dist:mac": "npm run build:all && npm run verify:build && electron-builder --mac",
+    "dist:linux": "npm run build:all && npm run verify:build && electron-builder --linux",
+    "electron:dev": "tsc -p electron/tsconfig.json && electron dist-electron/main.js",
+    "electron:build": "tsc -p electron/tsconfig.json",
+    "prebuild:next": "echo 'Building Next.js standalone...'",
+    "prebuild:electron": "echo 'Building Electron...'",
+    "predist": "echo 'Starting distribution build...'"
   },
   "dependencies": {
     "next": "16.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-joyride": "^2.9.3",
+    "electron": "^28.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -21,6 +38,72 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.globaleticaretakademisi.app",
+    "productName": "Global E-Ticaret Akademisi",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": ".next/standalone"
+      },
+      {
+        "from": ".next/static",
+        "to": ".next/static"
+      },
+      {
+        "from": "public",
+        "to": "public"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "public/favicon.ico",
+      "category": "public.app-category.education"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/favicon.ico",
+      "category": "Education"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "public/favicon.ico",
+      "uninstallerIcon": "public/favicon.ico",
+      "installerHeaderIcon": "public/favicon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": null
   }
 }
